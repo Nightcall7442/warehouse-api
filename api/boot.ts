@@ -75,10 +75,9 @@ app.all("/api/*", (c) => c.json({ error: "Not Found" }, 404));
 
 export default app;
 
+// Запуск сервера только в production
 if (env.isProduction) {
-  const { serve }            = await import("@hono/node-server");
-  const { serveStaticFiles } = await import("./lib/vite");
-  serveStaticFiles(app);
+  const { serve } = await import("@hono/node-server");
   const port = parseInt(process.env.PORT ?? "3000", 10);
   serve({ fetch: app.fetch, port }, () => {
     console.log(`[boot] Server running on http://localhost:${port}/`);
