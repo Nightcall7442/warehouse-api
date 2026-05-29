@@ -21,28 +21,26 @@ const allowedOrigins = env.isProduction
   : ["http://localhost:3000", "http://127.0.0.1:3000"];
 
 app.use("/api/*", cors({
-  origin:       (origin) => {
+  origin: (origin) => {
     if (!origin) return null;
     if (allowedOrigins.includes(origin)) return origin;
     return null;
   },
-  allowMethods:  ["GET", "POST", "OPTIONS"],
-  allowHeaders:  ["Content-Type", "Authorization"],
-  credentials:   true,
-  maxAge:        86400,
+  allowMethods: ["GET", "POST", "OPTIONS"],
+  allowHeaders: ["Content-Type", "Authorization"],
+  credentials: true,
+  maxAge: 86400,
 }));
 
-// ── Stripe webhook (must be BEFORE bodyLimit — needs raw body) ───────────────
+// Stripe webhook
 registerStripeWebhook(app);
 
-// ── Cron: trial ending reminders ─────────────────────────────────────────────
+// Cron: trial ending reminders
 app.get("/api/cron/trial-reminders", async (c) => {
-  // Verify cron secret (set CRON_SECRET in env)
   const secret = c.req.query("secret") ?? c.req.header("x-cron-secret");
   if (env.cronSecret && secret !== env.cronSecret) {
     return c.json({ error: "Unauthorized" }, 401);
   }
-  // Lazy import to keep boot.ts lean
   const { runTrialReminders } = await import("./cron/trial-reminders");
   const result = await runTrialReminders();
   return c.json(result);
@@ -52,9 +50,9 @@ app.use(bodyLimit({ maxSize: 10 * 1024 * 1024 }));
 
 app.use("/api/trpc/*", async (c) => {
   return fetchRequestHandler({
-    endpoint:      "/api/trpc",
-    req:           c.req.raw,
-    router:        appRouter,
+    endpoint: "/api/trpc",
+    req: c.req.raw,
+    router: appRouter,
     createContext,
     onError: ({ error, path }) => {
       if (error.code === "INTERNAL_SERVER_ERROR") {
