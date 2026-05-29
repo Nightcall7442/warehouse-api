@@ -1,4 +1,9 @@
-﻿# Dependencies
+# Удалить конфликтный файл
+Remove-Item .gitignore -Force
+
+# Создать новый .gitignore
+@"
+# Dependencies
 node_modules/
 package-lock.json
 
@@ -10,10 +15,13 @@ build/
 .env
 .env.local
 .env.production
+!.env.example
 
 # Logs
 *.log
 npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
 
 # OS files
 .DS_Store
@@ -31,7 +39,11 @@ pids
 
 # Testing
 coverage/
+*.lcov
 
 # Misc
 .vercel
 *.tsbuildinfo
+.cache/
+.npm/
+"@ | Out-File -FilePath .gitignore -Encoding utf8
